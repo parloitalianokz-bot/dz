@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Il Grande Scrittore — Quaderno di Compiti a Casa</title>
+
+  <!-- Google Fonts: Cormorant Garamond & Crimson Pro -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Crimson+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@1.43.0/dist/umd/lucide.min.js"></script>
+
+  <!-- Firebase Compatibility SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+  <style>
+    :root {
+      color-scheme: light;
+      --background: #f5efe0;
+      --surface-container-low: #fbf7ee;
+      --surface-container: #ece3cf;
+      --surface-container-high: #e3d6bf;
+      --on-surface: #1f1a17;
+      --on-surface-variant: #4a3f38;
+      --outline: #a8843f;
+      --outline-variant: #d8c7a3;
+      --primary: #6b1424;
+      --on-primary: #f5efe0;
+      --primary-container: #eedfdc;
+      --on-primary-container: #4a0d18;
+      --secondary: #2f4a3a;
+      --on-secondary: #f5efe0;
+      --tertiary: #a8843f;
+      --positive: #265432;
+      --warning: #825215;
+      --error: #9b2c1f;
+      --font-headline: 'Cormorant Garamond', Georgia, serif;
+      --font-body: 'Crimson Pro', Garamond, Georgia, serif;
+      --font-label: 'Cormorant Garamond', Georgia, serif;
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 1.5rem;
+      --space-xl: 2.5rem;
+      --space-2xl: 4rem;
+      --display-size: clamp(2.1rem, 1.6rem + 1.8vw, 3.25rem);
+      --headline-size: clamp(1.4rem, 1.2rem + 1vw, 1.95rem);
+      --subhead-size: clamp(1.1rem, 1.05rem + 0.35vw, 1.35rem);
+      --body-size: clamp(1.05rem, 1rem + 0.2vw, 1.15rem);
+      --label-size: 0.85rem;
+      --gilt-rule: 1px solid var(--outline);
+      --gilt-frame-inset: 5px;
+      --paper-vignette: inset 0 0 90px rgb(120 90 40 / 0.14);
+      --dur-short: 200ms;
+      --dur-long: 400ms;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      overflow-x: clip;
+      background-color: var(--background);
+      color: var(--on-surface);
+      font-family: var(--font-body);
+      font-size: 18px;
+      line-height: 1.65;
+    }
+
+    body {
+      overflow-x: clip;
+      min-height: 100vh;
+      box-shadow: var(--paper-vignette);
+      padding-bottom: var(--space-2xl);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 960px;
+      margin-inline: auto;
+      padding-inline: clamp(var(--space-md), 4vw, var(--space-xl));
+    }
+
+    .gilt-frame {
+      border: var(--gilt-rule);
+      outline: var(--gilt-rule);
+      outline-offset: calc(-1 * var(--gilt-frame-inset));
+      padding: clamp(var(--space-md), 3vw, var(--space-xl));
+      background-color: var(--surface-container-low);
+      position: relative;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: var(--font-headline);
+      font-weight: 500;
+      line-height: 1.2;
+      color: var(--on-surface);
+    }
+
+    h1 {
+      font-size: var(--display-size);
+      font-style: italic;
+      text-align: center;
+      margin-block: var(--space-xs) var(--space-sm);
+    }
+
+    h2 {
+      font-size: var(--headline-size);
+      font-style: italic;
+      color: var(--primary);
+      margin-bottom: var(--space-xs);
+    }
+
+    h3 {
+      font-size: var(--subhead-size);
+      font-weight: 600;
+      margin-bottom: var(--space-xs);
+    }
+
+    .lead-text {
+      font-size: var(--body-size);
+      color: var(--on-surface-variant);
+      text-align: center;
+      max-width: 68ch;
+      margin-inline: auto;
+      margin-bottom: var(--space-md);
+    }
+
+    .kicker {
+      font-family: var(--font-label);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: var(--label-size);
+      color: var(--primary);
+      text-align: center;
+      display: block;
+    }
+
+    .section-kicker {
+      font-family: var(--font-label);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 0.78rem;
+      color: var(--secondary);
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      margin-bottom: var(--space-xs);
+    }
+
+    .sticky-desk {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-color: var(--surface-container-low);
+      border-bottom: 1px solid var(--outline);
+      box-shadow: 0 4px 12px rgb(31 26 23 / 0.08);
+      padding-block: var(--space-sm);
+    }
+
+    .desk-inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-md);
+    }
+
+    .score-meter {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
+    .score-counter {
+      font-family: var(--font-headline);
+      font-style: italic;
+      font-size: 1.35rem;
+      color: var(--primary);
+      white-space: nowrap;
+    }
+
+    .progress-track {
+      width: clamp(120px, 20vw, 220px);
+      height: 8px;
+      background-color: var(--surface-container-high);
+      border: 1px solid var(--outline-variant);
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background-color: var(--primary);
+      width: 0%;
+      transition: width var(--dur-long) ease-out;
+    }
+
+    .desk-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .btn {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.55rem 1.1rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-xs);
+      border-radius: 0;
+      transition: all var(--dur-short) ease-out;
+      text-decoration: none;
+      min-height: 44px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: var(--on-primary);
+      border: 1px solid var(--primary);
+    }
+
+    .btn-primary:hover {
+      background-color: #520e1a;
+      border-color: #520e1a;
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--primary-container);
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      color: var(--on-surface-variant);
+      border: 1px solid var(--outline-variant);
+    }
+
+    .btn-outline:hover {
+      background-color: var(--surface-container);
+      color: var(--on-surface);
+      border-color: var(--outline);
+    }
+
+    .btn-audio {
+      background-color: var(--surface-container-low);
+      color: var(--secondary);
+      border: 1px solid var(--outline-variant);
+      padding: 0.35rem 0.65rem;
+      font-size: 0.75rem;
+      min-height: 34px;
+    }
+
+    .exercise-section {
+      margin-top: var(--space-2xl);
+      padding: clamp(var(--space-md), 3vw, var(--space-xl));
+      background-color: var(--surface-container-low);
+      border: 1px solid var(--outline-variant);
+      position: relative;
+    }
+
+    .exercise-header {
+      border-bottom: 1px solid var(--outline);
+      padding-bottom: var(--space-md);
+      margin-bottom: var(--space-lg);
+    }
+
+    .exercise-instructions {
+      font-size: var(--body-size);
+      color: var(--on-surface);
+      margin-top: var(--space-xs);
+    }
+
+    .ru-tip {
+      background-color: var(--surface-container);
+      border-left: 3px solid var(--tertiary);
+      padding: var(--space-sm) var(--space-md);
+      margin-block: var(--space-sm) var(--space-md);
+      font-size: 0.92rem;
+      color: var(--on-surface-variant);
+      line-height: 1.5;
+    }
+
+    .ru-tip-title {
+      font-family: var(--font-label);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-size: 0.76rem;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      margin-bottom: var(--space-xs);
+    }
+
+    .exercise-item {
+      padding-block: var(--space-md);
+      border-bottom: 1px solid var(--outline-variant);
+    }
+
+    .exercise-item:last-child {
+      border-bottom: none;
+    }
+
+    .item-prompt {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 1.1rem;
+      line-height: 1.8;
+      color: var(--on-surface);
+    }
+
+    .context-tag {
+      font-family: var(--font-label);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.75rem;
+      color: var(--secondary);
+      border: 1px solid var(--secondary);
+      padding: 0.15rem 0.45rem;
+      border-radius: 9999px;
+      margin-right: 0.4rem;
+    }
+
+    .inline-select, .inline-input {
+      font-family: var(--font-body);
+      font-size: 1.05rem;
+      color: var(--on-surface);
+      background-color: var(--background);
+      border: none;
+      border-bottom: 2px solid var(--outline);
+      padding: 0.2rem 0.5rem;
+      border-radius: 0;
+    }
+
+    .inline-select:focus, .inline-input:focus {
+      border-bottom-color: var(--primary);
+      background-color: var(--surface-container-low);
+      outline: none;
+    }
+
+    .inline-select.correct, .inline-input.correct {
+      border-bottom-color: var(--positive) !important;
+      background-color: #ebf5ee !important;
+      color: var(--positive) !important;
+    }
+
+    .inline-select.incorrect, .inline-input.incorrect {
+      border-bottom-color: var(--error) !important;
+      background-color: #faeceb !important;
+      color: var(--error) !important;
+    }
+
+    .feedback-panel {
+      display: none;
+      margin-top: var(--space-xs);
+      padding: var(--space-xs) var(--space-sm);
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    .feedback-panel.visible {
+      display: block;
+    }
+
+    .feedback-panel.feedback-correct {
+      color: var(--positive);
+      background-color: #ebf5ee;
+      border-left: 2px solid var(--positive);
+    }
+
+    .feedback-panel.feedback-incorrect {
+      color: var(--error);
+      background-color: #faeceb;
+      border-left: 2px solid var(--error);
+    }
+
+    .transform-box {
+      background-color: var(--surface-container);
+      border: 1px solid var(--outline-variant);
+      padding: var(--space-md);
+      margin-bottom: var(--space-md);
+    }
+
+    .transform-original {
+      font-style: italic;
+      color: var(--on-surface-variant);
+      margin-bottom: var(--space-sm);
+      border-left: 2px solid var(--outline);
+      padding-left: var(--space-sm);
+    }
+
+    .transform-instruction {
+      font-family: var(--font-label);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--primary);
+      margin-bottom: var(--space-xs);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sticky Desk Header -->
+  <header class="sticky-desk" aria-label="Strumenti di controllo compiti">
+    <div class="container desk-inner">
+      <div class="score-meter">
+        <span class="score-counter" id="desk-score-display">Punteggio: 0 / 40</span>
+        <div class="progress-track">
+          <div class="progress-fill" id="desk-progress-bar"></div>
+        </div>
+        <span class="kicker" id="desk-pct-display" style="text-align: left;">0%</span>
+      </div>
+
+      <div class="desk-actions">
+        <button class="btn btn-secondary btn-audio" id="btn-toggle-hints" onclick="toggleAllHints()">
+          <i data-lucide="help-circle" style="width: 16px; height: 16px;"></i>
+          <span>Note Russe</span>
+        </button>
+        <button class="btn btn-primary" onclick="verifyAllExercises()">
+          <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i>
+          <span>Verifica Tutto</span>
+        </button>
+        <button class="btn btn-outline" onclick="resetAllExercises()">
+          <i data-lucide="rotate-ccw" style="width: 16px; height: 16px;"></i>
+          <span>Ricomincia</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Dual Auth Bar (Student or Teacher) -->
+    <section class="gilt-frame" style="margin-top: var(--space-lg); padding: var(--space-md); border-left: 4px solid var(--primary);">
+      <!-- Unauthenticated View -->
+      <div id="auth-selection-box" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-md);">
+        <div>
+          <span class="kicker" style="text-align: left;">Quaderno Interattivo</span>
+          <h3 style="margin: 0; font-size: 1.25rem;">Accedi per salvare o verificare i compiti</h3>
+        </div>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: var(--space-xs); align-items: center;">
+          <!-- Student Login Input & Action -->
+          <div style="display: flex; gap: 0.3rem;">
+            <input type="text" id="student-name-input" class="inline-input" placeholder="Nome Studente..." style="border: 1px solid var(--outline); background-color: #fff; width: 140px; font-size: 0.9rem;">
+            <input type="email" id="student-email-input" class="inline-input" placeholder="Email (opzionale)" style="border: 1px solid var(--outline); background-color: #fff; width: 150px; font-size: 0.9rem;">
+            <button type="button" class="btn btn-primary" onclick="loginStudent()" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Entra Studente</button>
+          </div>
+          <span style="color: var(--outline); font-family: var(--font-label); font-weight: bold; margin-inline: 0.2rem;">|</span>
+          <!-- Direct Teacher Login Button -->
+          <button type="button" class="btn btn-secondary" onclick="openTeacherModal()" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; background-color: var(--surface-container-high);">
+            <i data-lucide="shield-check" style="width: 15px; height: 15px; color: var(--primary);"></i>
+            <span>Accedi Insegnante</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Authenticated Student Welcome Box -->
+      <div id="student-welcome-box" style="display: none; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-sm);">
+        <div>
+          <span class="kicker" style="text-align: left;">Studente Autenticato</span>
+          <h3 style="margin: 0; font-size: 1.35rem; color: var(--primary);" id="display-student-name">Studente</h3>
+        </div>
+        <div style="display: flex; gap: var(--space-xs);">
+          <button type="button" class="btn btn-outline" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;" onclick="logoutStudent()">Esci / Cambia Studente</button>
+          <button type="button" class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;" onclick="openTeacherModal()">Pannello Insegnante</button>
+        </div>
+      </div>
+
+      <!-- Authenticated Teacher Active Header Banner -->
+      <div id="teacher-welcome-box" style="display: none; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-sm);">
+        <div>
+          <span class="kicker" style="text-align: left; color: var(--secondary);">Sessione Insegnante Attiva</span>
+          <h3 style="margin: 0; font-size: 1.35rem; color: var(--secondary);">Maestro Antonio</h3>
+        </div>
+        <div style="display: flex; gap: var(--space-xs);">
+          <button type="button" class="btn btn-primary" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;" onclick="openTeacherModal()">Apri Registro Compiti</button>
+          <button type="button" class="btn btn-outline" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;" onclick="logoutTeacher()">Esci Insegnante</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Box Feedback Docente (visibile allo studente) -->
+    <section id="teacher-feedback-card" class="gilt-frame" style="display: none; margin-top: var(--space-md); border-left: 4px solid var(--secondary); background-color: #fbf5eb;">
+      <div style="display: flex; align-items: center; gap: var(--space-xs); color: var(--primary);">
+        <i data-lucide="award" style="width: 20px; height: 20px;"></i>
+        <h3 style="margin: 0; color: var(--primary); font-style: italic;">Valutazione e Commenti del Maestro Antonio</h3>
+      </div>
+      <div id="teacher-status-badge" style="font-weight: 600; margin-block: var(--space-xs); font-size: 1.05rem; color: var(--secondary);"></div>
+      <div id="teacher-comment-text" class="ru-tip" style="border-left-color: var(--primary); font-size: 1rem; margin-bottom: 0;"></div>
+    </section>
+
+    <!-- Title & Literary Masthead -->
+    <section style="margin-top: var(--space-xl); text-align: center;">
+      <span class="kicker">Accademia della Lingua Italiana · Corso del Maestro Antonio</span>
+      <h1>Il Grande Scrittore</h1>
+      <p class="lead-text">
+        Quaderno interattivo di compiti per casa ispirato alla storia di Riccardo Ricchi, del cane Dante e di Beatrice nel castello sulla montagna.
+      </p>
+    </section>
+
+    <!-- ESERCIZIO I -->
+    <section class="exercise-section" id="section-1">
+      <div class="exercise-header">
+        <span class="section-kicker"><i data-lucide="book-open" style="width: 14px; height: 14px;"></i> Esercizio I · Grammatica Applicata</span>
+        <h2>I Verbi Modali e Irregolari nel Castello</h2>
+        <p class="exercise-instructions">Scegli la forma corretta del verbo al presente indicativo.</p>
+      </div>
+
+      <article class="exercise-item" data-item="ex1_1">
+        <div class="item-prompt">
+          <span class="context-tag">Pranzo</span>
+          <span>1. Beatrice va nello studio e domanda: «Signor Ricchi, Lei non</span>
+          <select id="select-ex1-1" class="inline-select" onchange="checkSingleItem('ex1_1')">
+            <option value="">-- seleziona --</option>
+            <option value="vuole">vuole</option>
+            <option value="vuoi">vuoi</option>
+            <option value="vogliamo">vogliamo</option>
+          </select>
+          <span>mangiare il piatto caldo?»</span>
+        </div>
+        <div class="ru-tip ru-hint-box">
+          <span class="ru-tip-title">Подсказка</span> Formale (Lei) = 3ª singolare (vuole).
+        </div>
+        <div class="feedback-panel" id="fb-ex1_1"></div>
+      </article>
+
+      <article class="exercise-item" data-item="ex1_2">
+        <div class="item-prompt">
+          <span class="context-tag">Riccardo</span>
+          <span>2. Riccardo risponde: «Io adesso non</span>
+          <select id="select-ex1-2a" class="inline-select" onchange="checkSingleItem('ex1_2')">
+            <option value="">-- seleziona --</option>
+            <option value="posso">posso</option>
+            <option value="può">può</option>
+          </select>
+          <span>mangiare, perché</span>
+          <select id="select-ex1-2b" class="inline-select" onchange="checkSingleItem('ex1_2')">
+            <option value="">-- seleziona --</option>
+            <option value="devo">devo</option>
+            <option value="deve">deve</option>
+          </select>
+          <span>scrivere il mio romanzo!»</span>
+        </div>
+        <div class="feedback-panel" id="fb-ex1_2"></div>
+      </article>
+
+      <div style="margin-top: var(--space-md); text-align: right;">
+        <button class="btn btn-secondary" onclick="verifySection('section-1')">Verifica Sezione I</button>
+      </div>
+    </section>
+
+    <!-- ESERCIZIO II -->
+    <section class="exercise-section" id="section-2">
+      <div class="exercise-header">
+        <span class="section-kicker"><i data-lucide="repeat" style="width: 14px; height: 14px;"></i> Esercizio II · Trasformazione Punti di Vista</span>
+        <h2>La Trasformazione dei Punti di Vista</h2>
+      </div>
+
+      <div class="transform-box" data-item="ex2_1">
+        <div class="transform-instruction">A. Da Riccardo (Io) a Beatrice (Riccardo / Lui)</div>
+        <div class="transform-original">«La mattina io <strong>comincio</strong> a scrivere presto e <strong>leggo</strong> i miei manoscritti.»</div>
+        <div class="item-prompt">
+          <span>La mattina Riccardo</span>
+          <input type="text" id="input-ex2-1a" class="inline-input" placeholder="cominciare...">
+          <span>a scrivere e</span>
+          <input type="text" id="input-ex2-1b" class="inline-input" placeholder="leggere...">
+          <span>i suoi manoscritti.</span>
+        </div>
+        <div class="feedback-panel" id="fb-ex2_1"></div>
+      </div>
+
+      <div style="margin-top: var(--space-md); text-align: right;">
+        <button class="btn btn-secondary" onclick="verifySection('section-2')">Verifica Sezione II</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Teacher Dashboard Modal -->
+  <div id="teacher-modal" style="display: none; position: fixed; inset: 0; z-index: 1000; background-color: rgba(31, 26, 23, 0.75); backdrop-filter: blur(4px); overflow-y: auto; padding: 2rem 1rem;">
+    <div class="gilt-frame container" style="max-width: 850px; background-color: var(--background); margin-inline: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--outline); padding-bottom: var(--space-sm); margin-bottom: var(--space-md);">
+        <div>
+          <span class="kicker" style="text-align: left;">Area Riservata Insegnante</span>
+          <h2 style="margin: 0;">Registro Docente — Maestro Antonio</h2>
+        </div>
+        <button type="button" class="btn btn-outline" onclick="closeTeacherModal()" style="min-height: 36px; padding: 0.3rem 0.8rem;">Chiudi ✕</button>
+      </div>
+
+      <!-- Auth Screen for Teacher Modal -->
+      <div id="teacher-auth-screen" style="text-align: center; padding: var(--space-lg) 0;">
+        <p style="margin-bottom: var(--space-sm); font-size: 1.05rem;">Inserisci la password docente per accedere al registro dei compiti inviati:</p>
+        <div style="display: flex; justify-content: center; gap: var(--space-xs); max-width: 350px; margin-inline: auto;">
+          <input type="password" id="teacher-pass-input" class="inline-input" placeholder="Password docente..." style="border: 1px solid var(--outline); background-color: #fff; text-align: center;">
+          <button type="button" class="btn btn-primary" onclick="verifyTeacherPass()">Accedi</button>
+        </div>
+      </div>
+
+      <!-- Content Screen for Teacher Modal -->
+      <div id="teacher-dashboard-screen" style="display: none;">
+        <div id="teacher-students-list" style="display: flex; flex-direction: column; gap: var(--space-md);">
+          <p style="font-style: italic; color: var(--on-surface-variant);">Caricamento compiti in corso da Firebase...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const DB_URL = "https://esercizi-parlo-italiano-default-rtdb.europe-west1.firebasedatabase.app/";
+    let db = null;
+    let currentStudent = "";
+    let isTeacherAuthenticated = false;
+
+    // Initialize Firebase
+    try {
+      if (window.firebase) {
+        if (!firebase.apps.length) {
+          firebase.initializeApp({ databaseURL: DB_URL });
+        }
+        db = firebase.database();
+      }
+    } catch (e) {
+      console.warn("Errore Inizializzazione Firebase:", e);
+    }
+
+    function loginStudent() {
+      const inputName = document.getElementById('student-name-input');
+      const inputEmail = document.getElementById('student-email-input');
+      const name = inputName ? inputName.value.trim() : '';
+      const email = inputEmail ? inputEmail.value.trim() : '';
+      if (!name) {
+        alert("Inserisci il tuo nome per accedere al quaderno!");
+        return;
+      }
+
+      currentStudent = name.replace(/[.#$\[\]]/g, '_');
+      localStorage.setItem('parlo_italiano_student_name', currentStudent);
+      if (email) {
+        localStorage.setItem('parlo_italiano_student_email', email);
+      }
+
+      document.getElementById('auth-selection-box').style.display = 'none';
+      document.getElementById('teacher-welcome-box').style.display = 'none';
+      document.getElementById('student-welcome-box').style.display = 'flex';
+      document.getElementById('display-student-name').textContent = name;
+
+      syncStudentProgressToFirebase();
+      listenToStudentData();
+    }
+
+    function logoutStudent() {
+      if (confirm("Vuoi uscire dal quaderno attuale?")) {
+        currentStudent = "";
+        localStorage.removeItem('parlo_italiano_student_name');
+        document.getElementById('auth-selection-box').style.display = 'flex';
+        document.getElementById('student-welcome-box').style.display = 'none';
+        document.getElementById('teacher-feedback-card').style.display = 'none';
+      }
+    }
+
+    function logoutTeacher() {
+      isTeacherAuthenticated = false;
+      sessionStorage.removeItem('parlo_italiano_teacher_auth');
+      document.getElementById('teacher-welcome-box').style.display = 'none';
+      document.getElementById('auth-selection-box').style.display = 'flex';
+      document.getElementById('teacher-auth-screen').style.display = 'block';
+      document.getElementById('teacher-dashboard-screen').style.display = 'none';
+    }
+
+    async function syncStudentProgressToFirebase() {
+      if (!db || !currentStudent) return;
+
+      const scoreInfo = updateTotalScore();
+      const selectsData = {};
+      document.querySelectorAll('select[id]').forEach(s => { selectsData[s.id] = s.value; });
+
+      const inputsData = {};
+      document.querySelectorAll('input[type="text"][id]').forEach(i => { 
+        if (i.id !== 'student-name-input' && i.id !== 'student-email-input' && i.id !== 'teacher-pass-input') {
+          inputsData[i.id] = i.value; 
+        }
+      });
+
+      const studentEmail = localStorage.getItem('parlo_italiano_student_email') || '';
+      const payload = {
+        studentName: currentStudent,
+        studentEmail: studentEmail,
+        punteggio: scoreInfo.earned,
+        maxPunteggio: scoreInfo.maxScore,
+        percentuale: scoreInfo.pct,
+        ultimoAggiornamento: new Date().toISOString(),
+        selects: selectsData,
+        inputs: inputsData
+      };
+
+      try {
+        await db.ref(`compiti/il_grande_scrittore/${currentStudent}/risposte`).update(payload);
+      } catch (err) {
+        console.warn("Errore salvataggio Firebase:", err);
+      }
+    }
+
+    function listenToStudentData() {
+      if (!db || !currentStudent) return;
+      db.ref(`compiti/il_grande_scrittore/${currentStudent}`).on('value', snapshot => {
+        const data = snapshot.val();
+        if (!data) return;
+
+        const fbCard = document.getElementById('teacher-feedback-card');
+        const badge = document.getElementById('teacher-status-badge');
+        const comment = document.getElementById('teacher-comment-text');
+
+        if (data.commentoDocente || data.stato === 'approvato') {
+          fbCard.style.display = 'block';
+          badge.textContent = data.stato === 'approvato' ? '✓ Compito Approvato dal Maestro Antonio' : '✎ Revisionato';
+          comment.innerHTML = `<strong>Note dell'insegnante:</strong><br>${data.commentoDocente || 'Nessun commento.'}`;
+        }
+      });
+    }
+
+    function openTeacherModal() {
+      document.getElementById('teacher-modal').style.display = 'block';
+      if (isTeacherAuthenticated || sessionStorage.getItem('parlo_italiano_teacher_auth') === 'true') {
+        isTeacherAuthenticated = true;
+        document.getElementById('teacher-auth-screen').style.display = 'none';
+        document.getElementById('teacher-dashboard-screen').style.display = 'block';
+        loadTeacherDashboard();
+      } else {
+        document.getElementById('teacher-auth-screen').style.display = 'block';
+        document.getElementById('teacher-dashboard-screen').style.display = 'none';
+      }
+    }
+
+    function closeTeacherModal() {
+      document.getElementById('teacher-modal').style.display = 'none';
+    }
+
+    function verifyTeacherPass() {
+      const pass = document.getElementById('teacher-pass-input').value;
+      if (pass === 'Antonio2026') {
+        isTeacherAuthenticated = true;
+        sessionStorage.setItem('parlo_italiano_teacher_auth', 'true');
+        
+        // Aggiorna la vista principale
+        document.getElementById('auth-selection-box').style.display = 'none';
+        document.getElementById('student-welcome-box').style.display = 'none';
+        document.getElementById('teacher-welcome-box').style.display = 'flex';
+
+        document.getElementById('teacher-auth-screen').style.display = 'none';
+        document.getElementById('teacher-dashboard-screen').style.display = 'block';
+        loadTeacherDashboard();
+      } else {
+        alert("Password errata!");
+      }
+    }
+
+    function loadTeacherDashboard() {
+      if (!db) return;
+      db.ref('compiti/il_grande_scrittore').on('value', snapshot => {
+        const data = snapshot.val() || {};
+        const container = document.getElementById('teacher-students-list');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const studentKeys = Object.keys(data);
+        if (studentKeys.length === 0) {
+          container.innerHTML = '<p style="font-style: italic;">Nessun compito ancora inviato dagli studenti.</p>';
+          return;
+        }
+
+        studentKeys.forEach(sName => {
+          const sData = data[sName];
+          const rData = sData.risposte || {};
+          const card = document.createElement('div');
+          card.className = 'gilt-frame';
+          card.style.backgroundColor = '#fff';
+          card.style.padding = '1rem';
+
+          card.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <h3>Studente: ${sName} ${rData.studentEmail ? `(${rData.studentEmail})` : ''}</h3>
+              <span style="font-weight: bold; color: var(--primary);">Punteggio: ${rData.punteggio || 0} / ${rData.maxPunteggio || 40} (${rData.percentuale || 0}%)</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--on-surface-variant);">Ultimo aggiornamento: ${rData.ultimoAggiornamento ? new Date(rData.ultimoAggiornamento).toLocaleString() : 'N/D'}</p>
+            <div style="margin-top: 0.5rem;">
+              <label style="font-size: 0.85rem; font-weight: bold;">Note dell'insegnante / Комментарии преподавателя:</label>
+              <textarea id="teacher-note-${sName}" style="width: 100%; height: 75px; font-family: var(--font-body); padding: 0.4rem; border: 1px solid var(--outline); margin-top: 0.2rem;">${sData.commentoDocente || ''}</textarea>
+            </div>
+            <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.5rem;">
+              <button class="btn btn-secondary" onclick="saveTeacherEvaluation('${sName}', false)">Salva Note</button>
+              <button class="btn btn-primary" onclick="saveTeacherEvaluation('${sName}', true)">Approva & Notifica via Mail</button>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      });
+    }
+
+    async function saveTeacherEvaluation(studentName, isApproved) {
+      if (!db) return;
+      const commentText = document.getElementById(`teacher-note-${studentName}`)?.value || '';
+
+      const updates = {
+        commentoDocente: commentText,
+        stato: isApproved ? 'approvato' : 'in_revisione',
+        dataValutazione: new Date().toISOString()
+      };
+
+      try {
+        await db.ref(`compiti/il_grande_scrittore/${studentName}`).update(updates);
+        const snapshot = await db.ref(`compiti/il_grande_scrittore/${studentName}/risposte`).once('value');
+        const rData = snapshot.val() || {};
+        const studentEmail = rData.studentEmail || '';
+
+        alert(`Valutazione per ${studentName} salvata!`);
+
+        if (isApproved && studentEmail) {
+          const subject = encodeURIComponent(`Il tuo compito "Il grande scrittore" è stato corretto! 📚 / Твоё задание проверено!`);
+          const bodyText = `Ciao ${studentName}!\n\n` +
+            `Il Maestro Antonio ha corretto il tuo compito "Il grande scrittore".\n\n` +
+            `Note dell'insegnante / Замечания преподавателя:\n` +
+            `"${commentText || 'Compito approvato con successo!'}"\n\n` +
+            `Puoi riaprire la pagina del tuo compito o il tuo quaderno virtuale per vedere la scheda aggiornata con tutti i dettagli e i punteggi!\n\n` +
+            `----------------------------------------\n` +
+            `Привет, ${studentName}!\n\n` +
+            `Маэстро Антонио проверил твоё домашнее задание «Il grande scrittore».\n\n` +
+            `Ты можешь снова открыть страницу упражнения или свою интерактивную тетрадь, чтобы посмотреть подробные комментарии и оценки!\n\n` +
+            `Un caro saluto / С наилучшими пожеланиями,\n` +
+            `Parlo Italiano — Maestro Antonio`;
+
+          window.open(`mailto:${studentEmail}?subject=${subject}&body=${encodeURIComponent(bodyText)}`, '_blank');
+        }
+      } catch (e) {
+        alert("Errore salvataggio: " + e.message);
+      }
+    }
+
+    function toggleAllHints() {
+      const hints = document.querySelectorAll('.ru-hint-box');
+      hints.forEach(h => {
+        h.style.display = (h.style.display === 'none') ? 'block' : 'none';
+      });
+    }
+
+    function checkSingleItem(itemId) {
+      if (itemId === 'ex1_1') {
+        const val = document.getElementById('select-ex1-1').value;
+        const sel = document.getElementById('select-ex1-1');
+        const fb = document.getElementById('fb-ex1_1');
+        if (val === 'vuole') {
+          sel.className = 'inline-select correct';
+          fb.className = 'feedback-panel feedback-correct visible';
+          fb.textContent = 'Esatto! (Signor Ricchi, Lei non vuole...)';
+        } else if (val !== '') {
+          sel.className = 'inline-select incorrect';
+          fb.className = 'feedback-panel feedback-incorrect visible';
+          fb.textContent = 'Non corretto. Per la forma di cortesia (Lei) usa la 3ª persona singolare: "vuole".';
+        }
+      }
+      updateTotalScore();
+      syncStudentProgressToFirebase();
+    }
+
+    function verifySection(sectionId) {
+      if (sectionId === 'section-1') {
+        checkSingleItem('ex1_1');
+      }
+    }
+
+    function verifyAllExercises() {
+      checkSingleItem('ex1_1');
+    }
+
+    function resetAllExercises() {
+      if (confirm("Vuoi davvero cancellare tutte le risposte?")) {
+        document.querySelectorAll('select').forEach(s => { s.value = ''; s.className = 'inline-select'; });
+        document.querySelectorAll('input[type="text"]').forEach(i => {
+          if (i.id !== 'student-name-input' && i.id !== 'student-email-input') {
+            i.value = ''; i.className = 'inline-input';
+          }
+        });
+        document.querySelectorAll('.feedback-panel').forEach(f => { f.className = 'feedback-panel'; f.textContent = ''; });
+        updateTotalScore();
+        syncStudentProgressToFirebase();
+      }
+    }
+
+    function updateTotalScore() {
+      let earned = 0;
+      if (document.getElementById('select-ex1-1')?.value === 'vuole') earned += 5;
+      if (document.getElementById('select-ex1-2a')?.value === 'posso') earned += 5;
+      if (document.getElementById('select-ex1-2b')?.value === 'devo') earned += 5;
+
+      const pct = Math.round((earned / 40) * 100);
+      document.getElementById('desk-score-display').textContent = `Punteggio: ${earned} / 40`;
+      document.getElementById('desk-progress-bar').style.width = `${pct}%`;
+      document.getElementById('desk-pct-display').textContent = `${pct}%`;
+
+      return { earned, maxScore: 40, pct };
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) window.lucide.createIcons();
+      
+      if (sessionStorage.getItem('parlo_italiano_teacher_auth') === 'true') {
+        isTeacherAuthenticated = true;
+        document.getElementById('auth-selection-box').style.display = 'none';
+        document.getElementById('teacher-welcome-box').style.display = 'flex';
+      } else {
+        const savedStudent = localStorage.getItem('parlo_italiano_student_name');
+        if (savedStudent) {
+          document.getElementById('student-name-input').value = savedStudent;
+          loginStudent();
+        }
+      }
+    });
+  </script>
+</body>
+</html>
